@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg-gradient: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(255, 255, 255, 0.5);
+    --text: #1e293b;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --border: #cbd5e1;
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --shadow-inner: inset 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popInScale {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* --- LAYOUT --- */
+.container {
+    max-width: 750px;
+    width: 100%;
+    animation: fadeInUp 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.logo {
+    /* 1. Force a perfect square aspect ratio so the circle doesn't stretch */
+    height: 110px;
+    width: 110px; 
+    object-fit: cover; 
+    
+    /* 2. Cut the square into a perfect circle */
+    border-radius: 50%; 
+    
+    /* 3. Add a pure white background and inner padding */
+    background-color: #ffffff;
+    padding: 4px; 
+    
+    /* 4. The Magic: Multi-layered high-tech rings & 3D shadow */
+    box-shadow: 
+        0 0 0 4px #ffffff,                  /* Ring 1: crisp white inner border */
+        0 0 0 6px var(--accent),            /* Ring 2: sharp blue accent ring */
+        0 0 0 14px rgba(37, 99, 235, 0.15), /* Ring 3: soft blue outer glow / halo */
+        0 20px 30px rgba(0, 0, 0, 0.15);    /* Ring 4: deep drop shadow for a 3D floating effect */
+        
+    margin-bottom: 2.5rem;
+
+    /* 5. Keep your smooth startup pop-in and continuous floating animation */
+    animation: popInScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               float 4s ease-in-out infinite 0.8s;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, #1e293b, #334155);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+p { color: #64748b; font-size: 1.05rem; }
+
+main {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2.5rem;
+    box-shadow: var(--shadow), var(--shadow-inner);
+}
+
+/* --- INPUTS --- */
+.input-area {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+#questionInput {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    border: 2px solid white;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+#questionInput:focus {
+    border-color: var(--accent);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+button {
+    padding: 0 1.75rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+button:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+button:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-2px); }
+button:active:not(:disabled) { transform: translateY(0); }
+
+/* --- RESULTS --- */
+.hidden { display: none !important; }
+
+.result {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    animation: slideInRight 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.main-result {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.predicted-label {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 0.4rem 1.25rem;
+    border-radius: 30px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: popInScale 0.4s ease-out;
+}
+
+.confidence { font-size: 1rem; color: #64748b; font-weight: 500; }
+
+.bar-chart { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideInRight 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.bar-label {
+    width: 60px;
+    font-weight: 600;
+    text-align: right;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.bar-track {
+    flex: 1;
+    height: 12px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 9px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 9px;
+    width: 0%; /* Starts at 0 for animation */
+    transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.bar-value { width: 50px; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+
+/* --- HISTORY --- */
+.history-panel {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+
+.history-panel h2 { font-size: 1.1rem; color: #475569; margin-bottom: 1rem; }
+
+#historyList { list-style: none; }
+
+#historyList li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 0.95rem;
+    animation: slideInRight 0.4s ease-out forwards;
+}
+
+#historyList li:last-child { border-bottom: none; }
+.history-label { font-weight: 700; margin-left: 0.3rem; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(0,0,0,0.03); }

@@ -1,0 +1,9 @@
+flask==3.0.3
+waitress==3.0.0
+scikit-learn==1.5.2
+joblib==1.4.2
+sentence-transformers==3.3.1
+pandas==2.2.3
+requests==2.32.3
+numpy==2.0.1
+scipy==1.14.1

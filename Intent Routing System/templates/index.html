@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intent Routing System</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="../static/logo.png" alt="Intent Routing System Logo" class="logo">
+            <h1>Intent Routing System</h1>
+            <p>Ask a question – get instant intent routing</p>
+        </header>
+
+        <main>
+            <div class="input-area">
+                <input type="text" id="questionInput" placeholder="e.g., How do I reset my password?" />
+                <button id="classifyBtn">Classify</button>
+            </div>
+
+            <div id="resultSection" class="result hidden">
+                <div class="main-result">
+                    <span class="predicted-label" id="predictedLabel"></span>
+                    <span class="confidence" id="confidenceDisplay"></span>
+                </div>
+                <div class="bar-chart" id="barChart"></div>
+            </div>
+
+            <div class="history-panel">
+                <h2>Session History</h2>
+                <ul id="historyList"></ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const input = document.getElementById('questionInput');
+        const btn = document.getElementById('classifyBtn');
+        const resultSection = document.getElementById('resultSection');
+        const predictedLabel = document.getElementById('predictedLabel');
+        const confidenceDisplay = document.getElementById('confidenceDisplay');
+        const barChart = document.getElementById('barChart');
+        const historyList = document.getElementById('historyList');
+        
+        // Modern color palette for classes
+        const classColors = {
+            what: '#3b82f6', who: '#f97316', when: '#10b981',
+            where: '#8b5cf6', why: '#eab308', how: '#ef4444',
+            unclassified: '#94a3b8'
+        };
+
+        btn.addEventListener('click', classify);
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') classify(); });
+
+        async function classify() {
+            const question = input.value.trim();
+            if (!question) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Routing...'; // More dynamic text
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                displayResult(data);
+                addToHistory(data);
+
+            } catch (err) {
+                alert('Network error: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Classify';
+            }
+        }
+
+        function displayResult(data) {
+            // Reset animation by triggering reflow
+            resultSection.classList.remove('hidden');
+            resultSection.style.animation = 'none';
+            resultSection.offsetHeight; 
+            resultSection.style.animation = null;
+
+            predictedLabel.textContent = data.label;
+            predictedLabel.style.backgroundColor = classColors[data.label] || '#94a3b8';
+            confidenceDisplay.textContent = data.label === 'unclassified'
+                ? '(Confidence below threshold)'
+                : `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+
+            barChart.innerHTML = '';
+            if (data.all_probabilities) {
+                // Sort probabilities highest to lowest
+                const sortedProbs = Object.entries(data.all_probabilities).sort((a, b) => b[1] - a[1]);
+                
+                sortedProbs.forEach(([cls, prob], index) => {
+                    const percent = (prob * 100).toFixed(1);
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    // Add staggered animation delay
+                    bar.style.animationDelay = `${index * 0.1}s`;
+                    
+                    bar.innerHTML = `
+                        <span class="bar-label">${cls}</span>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="background-color:${classColors[cls]}"></div>
+                        </div>
+                        <span class="bar-value">${percent}%</span>
+                    `;
+                    barChart.appendChild(bar);
+
+                    // Trigger width animation after a tiny delay so CSS catches the 0 to X transition
+                    setTimeout(() => {
+                        bar.querySelector('.bar-fill').style.width = `${percent}%`;
+                    }, 50);
+                });
+            }
+        }
+
+        function addToHistory(data) {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="history-question">${data.question}</span> → <span class="history-label" style="color:${classColors[data.label]}">${data.label}</span>`;
+            historyList.prepend(li);
+            
+            while (historyList.children.length > 5) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
