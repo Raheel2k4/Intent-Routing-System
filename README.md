@@ -1,45 +1,48 @@
-🧭 Intent Routing System
+# 🧭 Intent Routing System
 
-A production‑grade microservice that instantly classifies any English question into one of six intent categories – what, who, when, where, why, how.
+[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![Model F1](https://img.shields.io/badge/macro%20F1-0.94-brightgreen)](#-evaluation)
 
+A **production‑grade microservice** that instantly classifies any English question into one of six intent categories – **what, who, when, where, why, how**.  
 It uses a distilled Sentence‑Transformer for semantic understanding, a fast logistic regression classifier, and exposes a clean REST API with a built‑in web interface.
 
-🚀 What Problem Does It Solve?
+---
 
-Customer support teams, e‑learning platforms, and chatbots handle thousands of questions daily. Manually reading and routing them is slow and expensive.
+## 🚀 What Problem Does It Solve?
+Customer support teams, e‑learning platforms, and chatbots handle thousands of questions daily. Manually reading and routing them is slow and expensive.  
+Intent Routing System **automates question triage**, reduces response times by up to 80%, and provides real‑time analytics on what users are asking.
 
-Intent Routing System automates question triage, reduces response times by up to 80%, and provides real‑time analytics on what users are asking.
+---
 
-✨ Features
+## ✨ Features
 
-🧠 Semantic Understanding – Uses all-MiniLM-L6-v2 embeddings, not just keywords.
+- 🧠 **Semantic Understanding** – Uses `all-MiniLM-L6-v2` embeddings, not just keywords.  
+- ⚡ **Blazing Fast** – Inference time < 15 ms per query.  
+- 🧪 **Confidence‑Aware** – Returns `unclassified` when the model is unsure (threshold = 0.35).  
+- 📊 **Live Web Demo** – Animated bar chart, session history, and colour‑coded predictions.  
+- 🔌 **True Microservice** – Decoupled REST API; integrate with any stack using a single `curl` command.  
+- 🐍 **One‑Click Setup** – `run.bat` creates a virtual environment, installs dependencies, trains the model (if missing), and starts the production server.  
+- 🏭 **Production WSGI** – Served by Waitress, no Flask dev‑server warnings.  
+- 🧹 **Robust Input Validation** – Rejects empty, malformed, or over‑long queries with clear errors.
 
-⚡ Blazing Fast – Inference time < 15 ms per query.
+---
 
-🧪 Confidence‑Aware – Returns unclassified when the model is unsure (threshold = 0.35).
+## 📸 Demo
 
-📊 Live Web Demo – Animated bar chart, session history, and colour‑coded predictions.
+![Web UI Demo](screenshots/demo.gif)  
+*Type any question – see the predicted intent, confidence, and probability distribution.*
 
-🔌 True Microservice – Decoupled REST API; integrate with any stack using a single curl command.
+---
 
-🐍 One‑Click Setup – run.bat creates a virtual environment, installs dependencies, trains the model (if missing), and starts the production server.
+## 🏗️ Architecture
 
-🏭 Production WSGI – Served by Waitress, no Flask dev‑server warnings.
-
-🧹 Robust Input Validation – Rejects empty, malformed, or over‑long queries with clear errors.
-
-📸 Demo
-
-Type any question – see the predicted intent, confidence, and probability distribution.
-
-🏗️ Architecture
-
-┌──────────────┐     POST /predict      ┌─────────────────────────┐
-│  Client App  │ ──────────────────────> │    Flask + Waitress     │
-│  (cURL, UI,  │ <────────────────────── │    (REST API)           │
-│   Slack, …)  │     JSON Response       └───────────┬─────────────┘
-└──────────────┘                                     │
-                                                     ▼
+    ┌──────────────┐     POST /predict      ┌─────────────────────────┐
+    │  Client App  │ ──────────────────────> │    Flask + Waitress       │
+    │  (cURL, UI,  │ <────────────────────── │    (REST API)             │
+    │   Slack, …)  │     JSON Response       └───────────┬─────────────┘
+    └──────────────┘                                     │
+                                                         ▼
                                           ┌─────────────────────────┐
                                           │  Sentence‑Transformer   │
                                           │  (all-MiniLM-L6-v2)     │
@@ -53,23 +56,20 @@ Type any question – see the predicted intent, confidence, and probability dist
                                           │  → label + confidence   │
                                           └─────────────────────────┘
 
+---
 
-📦 Installation & Quick Start
+## 📦 Installation & Quick Start
 
-Prerequisites
+### Prerequisites
+- **Windows** (the automated script is for Windows; Linux/macOS can run manually)
+- **Python 3.11** ([download](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe))
 
-Windows (the automated script is for Windows; Linux/macOS can run manually)
-
-Python 3.11 (download)
-
-One‑Click Setup (Windows)
-
-Clone the repository:
-
-git clone https://github.com/yourusername/intent-routing-system.git
-cd intent-routing-system
-
-
+### One‑Click Setup (Windows)
+1. Clone the repository:
+   ```bash
+   git clone [https://github.com/yourusername/intent-routing-system.git](https://github.com/yourusername/intent-routing-system.git)
+   cd intent-routing-system
+   
 Place your train_clean.csv dataset in the root folder (the included sample trains a good model).
 
 Double‑click run.bat – it will:
@@ -84,8 +84,6 @@ Train the classifier if model/intent_classifier.pkl is missing
 
 Launch the Waitress server and open your browser at http://127.0.0.1:5000
 
-Manual Setup (Any OS)
-
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate.bat     # Windows
@@ -93,15 +91,11 @@ pip install -r requirements.txt
 python train.py               # Train & save the model
 python app.py                 # Start the server
 
-
 📡 API Reference
-
 GET /
-
 Serves the interactive web demo.
 
 POST /predict
-
 Classify a question.
 
 Request:
@@ -109,7 +103,6 @@ Request:
 {
   "question": "How do I reset my password?"
 }
-
 
 Response (200):
 
@@ -127,108 +120,19 @@ Response (200):
   }
 }
 
-
 Error (400):
 
 {
   "error": "Question must not be empty"
 }
 
-
 Example with curl:
 
-curl -X POST http://127.0.0.1:5000/predict \
+curl -X POST [http://127.0.0.1:5000/predict](http://127.0.0.1:5000/predict) \
   -H "Content-Type: application/json" \
   -d '{"question":"Where is the Taj Mahal?"}'
 
-
-📊 Evaluation
-
-The model is trained on 1,314 cleaned question‑label pairs (UIUC dataset + custom examples).
-
-We use macro‑averaged F1‑score to account for class imbalance.
-
-Class
-
-Precision
-
-Recall
-
-F1‑Score
-
-Support
-
-what
-
-0.95
-
-0.96
-
-0.95
-
-210
-
-who
-
-0.93
-
-0.91
-
-0.92
-
-85
-
-when
-
-0.96
-
-0.94
-
-0.95
-
-95
-
-where
-
-0.94
-
-0.95
-
-0.94
-
-90
-
-why
-
-0.91
-
-0.89
-
-0.90
-
-55
-
-how
-
-0.95
-
-0.96
-
-0.96
-
-130
-
-Macro Avg
-
-0.94
-
-0.93
-
-0.94
-
-–
-
-Accuracy: 95.2%
+ccuracy: 95.2%
 
 Confidence threshold: 0.35 (chosen via validation sweep)
 
@@ -251,50 +155,8 @@ intent-routing-system/
 │   └── logo.png
 └── README.md
 
-
-🛠️ Technologies
-
-Layer
-
-Technology
-
-Language
-
-Python 3.11
-
-Web Framework
-
-Flask
-
-Production WSGI
-
-Waitress
-
-NLP Embeddings
-
-Sentence‑Transformers (all-MiniLM-L6-v2)
-
-Machine Learning
-
-scikit‑learn (Logistic Regression)
-
-Serialisation
-
-Joblib
-
-Data Handling
-
-Pandas
-
-Frontend
-
-HTML5, CSS3, Vanilla JavaScript (Fetch API)
-
 💰 Business Model (Sales Perspective)
-
-How we sell it:
-
-API‑as‑a‑Service with three tiers:
+How we sell it: API‑as‑a‑Service with three tiers:
 
 Developer (Free) – 1,000 requests/month
 
@@ -323,21 +185,17 @@ Real‑time intent analytics – understand what users are asking and why.
 Production‑grade reliability with confidence‑aware predictions.
 
 📹 Promotional Video
-
 A <5‑minute demo and sales pitch is available. See the promo/ folder or watch the video presentation submitted with the project.
 
 🤝 Contributing
-
 Contributions, issues, and feature requests are welcome.
 
 Open a pull request or issue to discuss improvements, fine‑tuned models, or multilingual extensions.
 
 📝 License
-
 This project is licensed under the MIT License – see the LICENSE file for details.
 
 🙏 Acknowledgements
-
 Sentence‑BERT paper: Reimers & Gurevych, EMNLP 2019
 
 UIUC question classification dataset
