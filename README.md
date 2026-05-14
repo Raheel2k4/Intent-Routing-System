@@ -37,6 +37,7 @@ Intent Routing System **automates question triage**, reduces response times by u
 
 ## 🏗️ Architecture
 
+```text
     ┌──────────────┐     POST /predict      ┌─────────────────────────┐
     │  Client App  │ ──────────────────────> │    Flask + Waitress       │
     │  (cURL, UI,  │ <────────────────────── │    (REST API)             │
@@ -55,6 +56,7 @@ Intent Routing System **automates question triage**, reduces response times by u
                                           │  (multinomial, F1=0.94) │
                                           │  → label + confidence   │
                                           └─────────────────────────┘
+```
 
 ---
 
@@ -65,47 +67,51 @@ Intent Routing System **automates question triage**, reduces response times by u
 - **Python 3.11** ([download](https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe))
 
 ### One‑Click Setup (Windows)
+
 1. Clone the repository:
    ```bash
    git clone [https://github.com/yourusername/intent-routing-system.git](https://github.com/yourusername/intent-routing-system.git)
    cd intent-routing-system
    
-Place your train_clean.csv dataset in the root folder (the included sample trains a good model).
+```
+2. Place your `train_clean.csv` dataset in the root folder (the included sample trains a good model).
+3. Double‑click `run.bat` – it will:
+   - Create a virtual environment with Python 3.11
+   - Install all dependencies
+   - Download the Sentence‑Transformer model (once, cached offline afterward)
+   - Train the classifier if `model/intent_classifier.pkl` is missing
+   - Launch the Waitress server and open your browser at `http://127.0.0.1:5000`
 
-Double‑click run.bat – it will:
+### Manual Setup (Any OS)
 
-Create a virtual environment with Python 3.11
-
-Install all dependencies
-
-Download the Sentence‑Transformer model (once, cached offline afterward)
-
-Train the classifier if model/intent_classifier.pkl is missing
-
-Launch the Waitress server and open your browser at http://127.0.0.1:5000
-
+```bash
 python -m venv venv
 source venv/bin/activate      # Linux/macOS
 venv\Scripts\activate.bat     # Windows
 pip install -r requirements.txt
 python train.py               # Train & save the model
 python app.py                 # Start the server
+```
 
-📡 API Reference
-GET /
+---
+
+## 📡 API Reference
+
+### `GET /`
 Serves the interactive web demo.
 
-POST /predict
+### `POST /predict`
 Classify a question.
 
-Request:
-
+**Request:**
+```json
 {
   "question": "How do I reset my password?"
 }
+```
 
-Response (200):
-
+**Response (200):**
+```json
 {
   "question": "How do I reset my password?",
   "label": "how",
@@ -119,27 +125,48 @@ Response (200):
     "where": 0.0004
   }
 }
+```
 
-Error (400):
-
+**Error (400):**
+```json
 {
   "error": "Question must not be empty"
 }
+```
 
-Example with curl:
-
+**Example with curl:**
+```bash
 curl -X POST [http://127.0.0.1:5000/predict](http://127.0.0.1:5000/predict) \
   -H "Content-Type: application/json" \
   -d '{"question":"Where is the Taj Mahal?"}'
+```
 
-ccuracy: 95.2%
+---
 
-Confidence threshold: 0.35 (chosen via validation sweep)
+## 📊 Evaluation
 
-Cross‑validation (5‑fold): mean macro F1 = 0.93 (±0.02)
+The model is trained on **1,314** cleaned question‑label pairs (UIUC dataset + custom examples).  
+We use **macro‑averaged F1‑score** to account for class imbalance.
 
-📁 Project Structure
+| Class   | Precision | Recall | F1‑Score | Support |
+|---------|-----------|--------|----------|---------|
+| what    | 0.95      | 0.96   | 0.95     | 210     |
+| who     | 0.93      | 0.91   | 0.92     | 85      |
+| when    | 0.96      | 0.94   | 0.95     | 95      |
+| where   | 0.94      | 0.95   | 0.94     | 90      |
+| why     | 0.91      | 0.89   | 0.90     | 55      |
+| how     | 0.95      | 0.96   | 0.96     | 130     |
+| **Macro Avg** | **0.94** | **0.93** | **0.94** | –    |
 
+**Accuracy:** 95.2%  
+**Confidence threshold:** 0.35 (chosen via validation sweep)  
+**Cross‑validation (5‑fold):** mean macro F1 = 0.93 (±0.02)
+
+---
+
+## 📁 Project Structure
+
+```text
 intent-routing-system/
 ├── run.bat                  # One-click setup for Windows
 ├── requirements.txt         # Python dependencies
@@ -154,52 +181,72 @@ intent-routing-system/
 │   ├── style.css
 │   └── logo.png
 └── README.md
+```
 
-💰 Business Model (Sales Perspective)
-How we sell it: API‑as‑a‑Service with three tiers:
+---
 
-Developer (Free) – 1,000 requests/month
+## 🛠️ Technologies
 
-Pro ($99/month) – 100,000 requests/month
+| Layer                | Technology                                      |
+|----------------------|-------------------------------------------------|
+| Language             | Python 3.11                                     |
+| Web Framework        | Flask                                           |
+| Production WSGI      | Waitress                                        |
+| NLP Embeddings       | Sentence‑Transformers (`all-MiniLM-L6-v2`)     |
+| Machine Learning     | scikit‑learn (Logistic Regression)              |
+| Serialisation        | Joblib                                          |
+| Data Handling        | Pandas                                          |
+| Frontend             | HTML5, CSS3, Vanilla JavaScript (Fetch API)     |
 
-Enterprise (Custom) – unlimited requests, on‑premises, SLA
+---
 
-Target clients:
+## 💰 Business Model (Sales Perspective)
 
-SaaS helpdesks (Zendesk alternatives, Freshdesk)
+**How we sell it:**  
+API‑as‑a‑Service with three tiers:
+- **Developer (Free)** – 1,000 requests/month
+- **Pro ($99/month)** – 100,000 requests/month
+- **Enterprise (Custom)** – unlimited requests, on‑premises, SLA
 
-E‑learning platforms (auto‑classify student queries)
+**Target clients:**
+- SaaS helpdesks (Zendesk alternatives, Freshdesk)
+- E‑learning platforms (auto‑classify student queries)
+- Chatbot developers (plug intent detection into conversations)
+- Market research agencies (analyse public question trends)
 
-Chatbot developers (plug intent detection into conversations)
+**Why they purchase:**
+- **80% reduction** in manual triage effort → immediate cost savings.
+- **Zero‑disruption integration** – one REST endpoint, works with any existing stack.
+- **Real‑time intent analytics** – understand what users are asking and why.
+- **Production‑grade reliability** with confidence‑aware predictions.
 
-Market research agencies (analyse public question trends)
+---
 
-Why they purchase:
+## 📹 Promotional Video
 
-80% reduction in manual triage effort → immediate cost savings.
+A <5‑minute demo and sales pitch is available. See the `promo/` folder or watch the video presentation submitted with the project.
 
-Zero‑disruption integration – one REST endpoint, works with any existing stack.
+---
 
-Real‑time intent analytics – understand what users are asking and why.
+## 🤝 Contributing
 
-Production‑grade reliability with confidence‑aware predictions.
-
-📹 Promotional Video
-A <5‑minute demo and sales pitch is available. See the promo/ folder or watch the video presentation submitted with the project.
-
-🤝 Contributing
-Contributions, issues, and feature requests are welcome.
-
+Contributions, issues, and feature requests are welcome.  
 Open a pull request or issue to discuss improvements, fine‑tuned models, or multilingual extensions.
 
-📝 License
-This project is licensed under the MIT License – see the LICENSE file for details.
+---
 
-🙏 Acknowledgements
-Sentence‑BERT paper: Reimers & Gurevych, EMNLP 2019
+## 📝 License
 
-UIUC question classification dataset
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
-scikit‑learn & HuggingFace communities
+---
 
-Made with ❤️ for the semester project – and built to be production‑ready.
+## 🙏 Acknowledgements
+
+- Sentence‑BERT paper: Reimers & Gurevych, *EMNLP 2019*
+- UIUC question classification dataset
+- scikit‑learn & HuggingFace communities
+
+---
+
+**Made with ❤️ for the semester project – and built to be production‑ready.**
